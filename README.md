@@ -1,4 +1,4 @@
-![Hey there, I'm Abdelkader. I build things from scratch — especially AI systems.](#)
+![Hey there, I'm Abdelkader. I build things from scratch — especially AI systems.](https://github.com/CyrisXD/CyrisXD/raw/master/header.gif)
 
 # 👋 Hi there, I'm Abdelkader
 
