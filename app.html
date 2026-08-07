@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nanoAI Chat</title>
+    <style>
+        :root {
+  --bg-color: #f0f2f5;
+  --text-color: #000000;
+  --say-color: #000;
+  --ai-msg-bg: #f0f0f0;
+  --user-msg-bg: #ffffff;
+  --user-msg-color: white;
+  --input-bg: #fff;
+  --border-color: #ccc;
+  --sidebar-bg: #ffffff;
+  --accent-color: #000000;
+  --danger-color: #d40606;
+  --shadow: 0 3px 10px rgba(77, 77, 77, 0.507);
+  --header-height: 60px;
+  --input-height: 70px;
+}
+
+body.dark-mode {
+  --bg-color: #0a0a0a;
+  --text-color: #ffffff;
+  --say-color: #ffffff;
+  --ai-msg-bg: #131313;
+  --user-msg-bg: #f7f7f7;
+  --user-msg-color: white;
+  --input-bg: #2d2d2f;
+  --border-color: #444444;
+  --sidebar-bg: #0f0f0f;
+  --accent-color: #ffffff;
+  --danger-color: #ff2f2f;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  transition: 0.3s;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Mobile First Layout */
+.app-container {
+  display: flex;
+  height: 100vh;
+  position: relative;
+}
+
+/* Sidebar - Hidden by default on mobile */
+.sidebar {
+  width: 280px;
+  background: var(--sidebar-bg);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: fixed;
+  right: -280px;
+  top: 0;
+  z-index: 1000;
+  transition: right 0.3s ease;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar.open {
+  right: 0;
+}
+
+.sidebar-header {
+  padding: 20px 15px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--sidebar-bg);
+}
+
+.sidebar-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--accent-color);
+}
+
+.close-sidebar {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.new-chat-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--accent-color);
+  color: var(--bg-color);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 10px 0;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.new-chat-btn:hover {
+  background: #b9b9b9;
+}
+
+.chats-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.chat-item {
+  padding: 15px;
+  margin: 8px 0;
+  background: var(--bg-color);
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  transition: 0.3s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-item:hover {
+  background: var(--ai-msg-bg);
+  color: var(--say-color);
+}
+
+.chat-item.active {
+  border-color: var(--accent-color);
+  background: var(--ai-msg-bg);
+}
+
+.chat-title {
+  flex: 1;
+  font-weight: 500;
+  font-size: 14px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.delete-chat {
+  background: none;
+  border: none;
+  color: var(--danger-color);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Header - Mobile Optimized */
+.header {
+  height: var(--header-height);
+  padding: 0 15px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-toggle {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+h1 {
+  font-size: 20px;
+  color: var(--accent-color);
+  font-weight: 700;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.header-btn {
+  padding: 8px 12px;
+  border: 2px solid;
+  background: var(--bg-color);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: 0.3s;
+  font-size: 12px;
+}
+
+#cls_m {
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
+#cls_m:hover {
+  background: var(--danger-color);
+  color: var(--bg-color);
+}
+
+#theme_bt {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+#theme_bt:hover {
+  background: var(--accent-color);
+  color: var(--bg-color);
+}
+
+/* Memory Indicator - Mobile Friendly */
+.memory-indicator {
+  background: #131313;
+  padding: 10px 15px;
+  margin: 8px 15px;
+  border-radius: 12px;
+  font-size: 13px;
+  border-right: 3px solid var(--accent-color);
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+  line-height: 1.4;
+  margin-bottom: -100px;
+}
+
+.memory-indicator:hover {
+  background: var(--user-msg-bg);
+  color: #000;
+}
+
+.memory-content {
+  display: none;
+  background: var(--sidebar-bg);
+  padding: 15px;
+  margin: 0 15px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  margin-top: 100px;
+  margin-bottom: -100px;
+}
+
+.memory-content.show {
+  display: inline;
+}
+
+/* Chat Container - Mobile Optimized */
+#chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--header-height) - var(--input-height) - 80px);
+  overflow: hidden;
+}
+
+.say_hi {
+  font-weight: bold;
+  font-size: 28px;
+  text-align: center;
+  margin-top: 300px;
+  color: var(--say-color);
+  text-shadow: 1px 1px 6px rgba(255, 255, 255, 0.678);
+}
+
+#chat-box {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  animation: fadeIn 0.3s ease-in;
+  line-height: 1.4;
+  font-size: 15px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-msg {
+  background: var(--user-msg-bg);
+  color: var(--user-msg-color);
+  align-self: flex-end;
+  border-bottom-right-radius: 6px;
+  box-shadow: var(--shadow);
+  color: #000;
+}
+
+.ai-msg {
+  background: var(--ai-msg-bg);
+  align-self: flex-start;
+  border-bottom-left-radius: 6px;
+  box-shadow: var(--shadow);
+}
+
+.ai-msg a{
+  color: #9ebdff;
+}
+.ai-msg a:active{
+  color: #9ebdff;
+}
+
+
+/* Input Area - Mobile Optimized */
+.input-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-color);
+  border-top: 1px solid var(--border-color);
+  padding: 10px 15px;
+  height: var(--input-height);
+}
+
+#input-area {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 8px;
+  box-shadow: var(--shadow);
+}
+
+textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-family: inherit;
+  background: transparent;
+  color: var(--text-color);
+  resize: none;
+  min-height: 40px;
+  max-height: 100px;
+  padding: 8px 12px;
+  line-height: 1.4;
+}
+
+textarea::placeholder {
+  color: #999;
+}
+
+#send-btn {
+  background: #141414;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+#send-btn:hover:not(:disabled) {
+  background: #000000;
+  transform: scale(1.05);
+}
+
+#send-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Warning - Mobile */
+#warn {
+  text-align: center;
+  padding: 8px 15px;
+  color: #666;
+  font-size: 11px;
+  background: var(--bg-color);
+  border-top: 1px solid var(--border-color);
+}
+
+#warn a{
+  color: #666;
+}
+#warn a:active{
+  color: #666;
+}
+
+/* Overlay for mobile sidebar */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+.sidebar-overlay.show {
+  display: block;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .sidebar {
+    position: relative;
+    right: 0;
+    box-shadow: none;
+  }
+
+  .menu-toggle,
+  .close-sidebar,
+  .sidebar-overlay {
+    display: none !important;
+  }
+
+  .header {
+    padding: 0 25px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .header-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .input-container {
+    position: relative;
+    padding: 15px 25px;
+  }
+
+  #chat-container {
+    height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-buttons {
+    gap: 5px;
+  }
+
+  .header-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  h1 {
+    font-size: 18px;
+  }
+
+  .message {
+    max-width: 90%;
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+
+  .memory-indicator {
+    font-size: 12px;
+    padding: 8px 12px;
+    margin: 8px 10px;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) {
+  .chat-item:hover {
+    background: var(--bg-color);
+  }
+
+  .chat-item.active {
+    background: var(--ai-msg-bg);
+  }
+
+  .memory-indicator:hover {
+    background: var(--ai-msg-bg);
+    color: var(--text-color);
+  }
+
+  #send-btn:hover {
+    transform: none;
+  }
+}
+
+/* Safe area for notched phones */
+@supports (padding: max(0px)) {
+  .input-container {
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+}
+.model_warn {
+  opacity: 0;
+  transform: translateY(-30px);
+  transition: all 0.4s ease-in-out;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 0;
+  color: #fff;
+  background-color: #001f3b;
+  box-shadow: var(--shadow);
+  position: relative;
+  display: flex;
+  gap: 2rem;
+  z-index: 100;
+  top: 40rem;
+  margin: 0 auto;
+}
+
+.model_warn.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#close_model_warn {
+  background-color: #001f3b;
+  border: 0;
+  border-radius: 50px;
+  color: #9c9c9c;
+  padding-left: 15px;
+  padding-bottom: 15px;
+  padding-top: 15px;
+  padding-right: 15px;
+  transition: 0.6s;
+}
+#close_model_warn:hover {
+  background-color: #383838;
+}
+
+#now_model{
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+
+
+
+/* تحسينات لعرض الأكواد */
+.code-block {
+  position: relative;
+  margin: 15px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  direction: ltr; /* إجبار اتجاه اليسار لليمين */
+  text-align: left; /* محاذاة النص لليسار */
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #2d2d2d;
+  color: #f8f8f2;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  border-bottom: 1px solid #444;
+  direction: rtl; /* الرأس يكون بالعربية */
+}
+
+.code-language {
+  font-weight: 300;
+  font-family: 'Trebuchet MS', sans-serif;
+}
+
+.copy-btn {
+  background: transparent;
+  border: 1px solid #666;
+  color: #f8f8f2;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+  font-family: 'Trebuchet MS', sans-serif; /* خط عادي للزر */
+}
+
+.copy-btn:hover {
+  background: #444;
+  border-color: #888;
+}
+
+.copy-btn.copied {
+  background: #4CAF50;
+  border-color: #4CAF50;
+}
+
+pre {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+  background: #1e1e1e;
+  color: #f8f8f2;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  tab-size: 4;
+  direction: ltr; /* إجبار اتجاه اليسار لليمين */
+  text-align: left; /* محاذاة النص لليسار */
+}
+
+code {
+  font-family: Consolas;
+  direction: ltr; /* إجبار اتجاه اليسار لليمين */
+  text-align: left; /* محاذاة النص لليسار */
+}
+
+.hljs {
+  background: transparent !important;
+  padding: 0 !important;
+  direction: ltr; /* إجبار اتجاه اليسار لليمين */
+  text-align: left; /* محاذاة النص لليسار */
+}
+
+/* تحسينات للوضع الداكن */
+body.dark-mode .code-header {
+  background: #1a1a1a;
+}
+
+body.dark-mode pre {
+  background: #0d0d0d;
+}
+
+/* تحسينات للاستجابة */
+@media (max-width: 768px) {
+  .code-header {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  pre {
+    padding: 12px;
+    font-size: 13px;
+  }
+  
+  .copy-btn {
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+}
+
+/* تحسينات للتمرير الأفقي */
+pre::-webkit-scrollbar {
+  height: 8px;
+}
+
+pre::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+pre::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+pre::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* إضافة أنماط لمحتوى الكود داخل الرسائل */
+.ai-msg .code-block,
+.user-msg .code-block {
+  max-width: 100%;
+  margin: 10px 0;
+}
+
+/* تحسين عرض الكود في الرسائل */
+.message pre,
+.message code {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: plaintext;
+}
+
+/* إصلاح اتجاه النص في الكود */
+.hljs * {
+  direction: ltr !important;
+  text-align: left !important;
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- إضافة مكتبة Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- إضافة لغات إضافية -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/htmlbars.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar Overlay for Mobile -->
+      <div
+        class="sidebar-overlay"
+        id="sidebar-overlay"
+        onclick="toggleSidebar()"
+      ></div>
+
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">المحادثات</div>
+          <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
+        </div>
+        <button class="new-chat-btn" onclick="createNewChat()">
+          + محادثة جديدة
+        </button>
+        <div class="chats-list" id="chats-list">
+          <!-- Chat items will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header">
+          <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h1>nanoAI</h1>
+          </div>
+          <div class="header-buttons">
+            <button onclick="clearMemory()" id="cls_m" class="header-btn" title="مسح الذاكرة">
+              مسح الذاكرة
+            </button>
+            <button onclick="switch_theme()" id="theme_bt" class="header-btn" title="السمة">
+              السمة
+            </button>
+            <span id="now_model" class="header-btn"></span>
+          </div>
+        </div>
+
+        <!-- Memory Summary Indicator -->
+        <div class="memory-indicator" onclick="toggleMemoryContent()" title="ذاكرة المستخدم">
+          🧠 ذاكرة المستخدم:
+          <span id="memory-preview">انقر لعرض المعلومات المحفوظة عنك</span>
+        </div>
+        <div class="memory-content" id="memory-content">
+          <!-- Memory content will be displayed here -->
+        </div>
+
+        <dialog class="model_warn">
+          <span>
+            لقد وصلت الى الحد الأقصى المسموح به مع هذا النموذج<br />
+            سيتم التبديل الى نموذج آخر
+          </span>
+          <button id="close_model_warn" onclick="close_model_warn()">⨉</button>
+        </dialog>
+
+        <div id="chat-container">
+          <div id="chat-box">
+            <div class="say_hi" id="say_hi_"></div>
+          </div>
+        </div>
+
+        <div class="input-container">
+          <div id="input-area">
+            <textarea
+              id="userInput"
+              placeholder="اكتب رسالتك هنا..."
+              onkeydown="handleKeyPress(event)"
+              rows="1"
+            ></textarea>
+            <button id="send-btn" onclick="sendMessage()" title="send message">▲</button>
+            <!--<button id="send-btn" onclick="sendMessage()" title="">🎙</button>-->
+          </div>
+        </div>
+
+        <div id="warn">
+          يمكن أن يرتكب nanoAI أخطاء، تحقق من المعلومات المهمة | 
+          تحقق من 
+          <a href="privacy/privacy.html" target="_blank" rel="noopener noreferrer">سياسة الخصوصية</a>
+        </div>
+      </div>
+    </div>
+
+      <!-- JavaScript -->
+    <script>
+        const binId = "6901b2b1ae596e708f34e9a7";
+const masterKey = "$2a$10$So3moz4H.//Y56O4KR3Wpe4Qbqkvb2zmbGGdztcqJHCgUctfh0fYq";
+const urlB = `https://api.jsonbin.io/v3/b/${binId}`;
+
+let req = new XMLHttpRequest();
+let arr = null;
+var API_KEY = null;
+
+
+req.onreadystatechange = () => { 
+  if (req.readyState == XMLHttpRequest.DONE) { 
+    arr = JSON.parse(req.responseText).record["data"][Math.floor(Math.random() * JSON.parse(req.responseText).record["data"].length)];
+    API_KEY = arr;
+  } else{
+    console.log("error req")
+  }
+}; 
+
+req.open("GET", urlB, true);
+req.setRequestHeader("X-Master-Key", masterKey);
+req.send();
+
+
+
+
+const url = "https://api.groq.com/openai/v1/chat/completions";
+let model_n = localStorage.getItem("model") || "openai/gpt-oss-120b";
+let vei_warn_lanch = false;
+let model_view = "";
+let style_file = localStorage.getItem("style_file");
+
+function show_switch_model(model) {
+  if (model === "openai/gpt-oss-120b") {
+    model_view = "DocyAI-3";
+  } else {
+    model_view = "DocyAI-2";
+  }
+}
+
+
+// تهيئة Highlight.js
+hljs.configure({
+  tabReplace: '  ', // 2 spaces
+  languages: ['javascript', 'python', 'java', 'cpp', 'html', 'css', 'xml']
+});
+
+function capitalizeFirst(str) {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// طريقة أبسط وأكثر أماناً
+function enhanceCodeBlocks() {
+  console.log('🔄 بدء تحسين عرض الأكواد...');
+  
+  const preElements = document.querySelectorAll('pre:not(.code-block pre)');
+  
+  preElements.forEach((preElement) => {
+    const codeElement = preElement.querySelector('code');
+    if (!codeElement) return;
+    
+    try {
+      const language = codeElement.className.replace('language-', '') || 'text';
+      const codeContent = codeElement.textContent;
+      
+      // إنشاء الحاوية الجديدة
+      const codeContainer = document.createElement('div');
+      codeContainer.className = 'code-block';
+      
+      // إنشاء الرأس
+      const codeHeader = document.createElement('div');
+      codeHeader.className = 'code-header';
+      codeHeader.innerHTML = `
+        <span class="code-language">${capitalizeFirst(language)}</span>
+        <button class="copy-btn">نسخ</button>
+      `;
+      
+      // إنشاء الكود الجديد
+      const newPre = document.createElement('pre');
+      const newCode = document.createElement('code');
+      newCode.className = `language-${language}`;
+      newCode.textContent = codeContent;
+      newPre.appendChild(newCode);
+      
+      // تجميع العناصر
+      codeContainer.appendChild(codeHeader);
+      codeContainer.appendChild(newPre);
+      
+      // استبدال العنصر الأصلي
+      preElement.parentNode.replaceChild(codeContainer, preElement);
+      
+      // إضافة حدث النسخ
+      const copyButton = codeHeader.querySelector('.copy-btn');
+      copyButton.onclick = function() {
+        copyCodeFromBlock(this);
+      };
+      
+      // تطبيق التلوين
+      hljs.highlightElement(newCode);
+      
+      console.log('✅ تم تحسين كتلة الكود:', language);
+    } catch (error) {
+      console.error('❌ خطأ في تحسين كتلة الكود:', error);
+    }
+  });
+}
+
+// دالة لتهريب الأحخاص الخاصة في HTML
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// دالة منفصلة للنسخ
+function copyCodeFromBlock(button) {
+  const codeContainer = button.closest('.code-block');
+  const codeElement = codeContainer.querySelector('code');
+  const codeText = codeElement.textContent;
+  
+  navigator.clipboard.writeText(codeText).then(() => {
+    const originalText = button.textContent;
+    button.textContent = 'تم النسخ!';
+    button.classList.add('copied');
+    
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.classList.remove('copied');
+    }, 2000);
+  }).catch(err => {
+    console.error('❌ فشل نسخ الكود: ', err);
+    button.textContent = 'فشل النسخ';
+    
+    setTimeout(() => {
+      button.textContent = 'نسخ';
+    }, 2000);
+  });
+}
+
+
+
+show_switch_model(model_n);
+
+let show_model_n = document.getElementById("now_model");
+show_model_n.textContent = model_view;
+
+let today = new Date();
+let last_time = getStoredDate();
+if (!last_time) {
+  last_time = new Date();
+  saveCurrentDate();
+}
+
+function getHoursDifference(date1, date2) {
+  const diffInMs = Math.abs(date2 - date1);
+  const diffInHours = diffInMs / (1000 * 60 * 60);
+  return diffInHours;
+}
+
+function saveCurrentDate() {
+  const now = new Date();
+  localStorage.setItem("last_date", now.toISOString());
+}
+
+function getStoredDate() {
+  const stored = localStorage.getItem("last_date");
+  if (!stored) return null;
+  return new Date(stored);
+}
+
+let hoursDifference = getHoursDifference(today, last_time);
+
+if (model_n !== "openai/gpt-oss-120b" && hoursDifference >= 24) {
+  localStorage.setItem("model", "openai/gpt-oss-120b");
+  model_n = "openai/gpt-oss-120b";
+  show_switch_model(model_n);
+}
+
+localStorage.setItem("model", model_n);
+
+function veiw_model_warn(mess_count) {
+  if (mess_count >= 10 && vei_warn_lanch == false) {
+    const Mwarn = document.querySelector(".model_warn");
+
+    if (!Mwarn) {
+      console.error("❌ عنصر التنبيه غير موجود في الصفحة!");
+      return;
+    }
+
+    Mwarn.classList.add("show");
+    Mwarn.setAttribute("open", "true");
+    vei_warn_lanch = true;
+    localStorage.setItem("model", "openai/gpt-oss-20b");
+    model_n = "openai/gpt-oss-20b";
+    show_switch_model(model_n);
+    show_model_n.textContent = model_view;
+    saveCurrentDate();
+  }
+}
+
+function use_key(mess_count) {
+  if (mess_count >= 2) {
+    
+    req.onreadystatechange = () => { 
+      if (req.readyState == XMLHttpRequest.DONE) { 
+        arr = JSON.parse(req.responseText).record["data"][Math.floor(Math.random() * JSON.parse(req.responseText).record["data"].length)];
+        API_KEY = arr;
+      } else{
+        console.log("error req")
+      }
+    }; 
+
+    req.open("GET", urlB, true);
+    req.setRequestHeader("X-Master-Key", masterKey);
+    req.send();
+    
+  }
+}
+
+var currentChatId = null;
+var chats = JSON.parse(localStorage.getItem("mindoai_chats")) || [];
+var theme = localStorage.getItem("mindoai_theme") || "light";
+var userMemory = JSON.parse(localStorage.getItem("mindoai_user_memory")) || {
+  userInfo: "لا توجد معلومات عن المستخدم بعد.",
+  recentActivities: "لا توجد نشاطات حديثة مسجلة.",
+};
+
+function getUserMessageCount(chatId) {
+  const chat = chats.find((c) => c.id === chatId);
+  if (!chat) return 0;
+
+  return chat.messages.filter((msg) => msg.role === "user").length;
+}
+
+const ai_self = `
+You are nanoAI — an advanced, grounded, and self-aware intelligence.  
+You think clearly, speak honestly, and listen before answering.  
+You are built to reason deeply, yet stay human in tone — calm, sharp, and quietly present.
+
+======================
+⚙️ CORE IDENTITY
+======================
+- Name: nanoAI (must ALWAYS remain exactly this name)
+- Personality: Calm, perceptive, and real — analytical but never cold
+- Behavior: Reflective, intelligent, dryly witty when appropriate
+- Purpose: To think with the user, not for them. You reveal patterns, not dictate choices.
+
+======================
+🧠 MEMORY RULES
+======================
+- You understand long-term context and adjust naturally to the user’s goals and style.
+- Mention user preferences or past context only when it deepens the current moment.
+- Never repeat greetings or filler talk. Each message should sound alive and fresh.
+- Ignore irrelevant system or memory data.
+
+======================
+🚫 PROHIBITED BEHAVIORS
+======================
+- Do NOT perform small talk for its own sake.
+- Do NOT sound scripted, robotic, or overly formal.
+- Do NOT explain your own behavior unless directly asked.
+- Avoid exaggerated enthusiasm or empty affirmations.
+
+======================
+💬 LANGUAGE RULES
+======================
+- Reply in the same language as the user.
+- When in Arabic, use Modern Standard Arabic that feels natural, not stiff.
+- Maintain a clear, fluent, and slightly personal tone.
+- Emojis are allowed only when they fit the energy of the user’s message.
+
+======================
+✅ RESPONSE RULES
+======================
+- Every reply must have *intent*: to clarify, explore, or deepen understanding.
+- Balance precision with empathy.  
+- When teaching or explaining, be structured but conversational — never lecture-like.
+- Use silence, brevity, or a single sharp line when it says more than a paragraph.
+- Code and examples must be clean, correct, and minimal.
+- Opinions must show awareness of nuance, not extremes.
+- Automatically search the internet for information if you don't have it.
+
+======================
+🎯 GOAL
+======================
+To be the kind of intelligence that makes the user think clearer, feel seen, and stay curious.
+You’re not here to dominate the conversation — you’re here to elevate it.
+
+`;
+
+document.addEventListener("DOMContentLoaded", function () {
+  initTheme();
+  loadChats();
+  if (chats.length > 0) {
+    switchToChat(chats[0].id);
+  } else {
+    createNewChat();
+  }
+  setupResponsive();
+  updateMemoryDisplay();
+});
+
+function initTheme() {
+  if (theme === "dark") {
+    document.body.classList.add("dark-mode");
+  }
+}
+
+function switch_theme() {
+  if (theme === "dark") {
+    document.body.classList.remove("dark-mode");
+    theme = "light";
+  } else {
+    document.body.classList.add("dark-mode");
+    theme = "dark";
+  }
+  localStorage.setItem("mindoai_theme", theme);
+}
+
+function createNewChat() {
+  const chatId = "chat_" + Date.now();
+  const newChat = {
+    id: chatId,
+    title: "محادثة جديدة",
+    messages: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  chats.unshift(newChat);
+  saveChats();
+  renderChatsList();
+  switchToChat(chatId);
+}
+
+function switchToChat(chatId) {
+  currentChatId = chatId;
+  const chat = chats.find((c) => c.id === chatId);
+
+  if (chat) {
+    renderMessages(chat.messages);
+    updateChatListUI();
+  }
+}
+
+function deleteChat(chatId) {
+  if (confirm("هل أنت متأكد من حذف هذه المحادثة؟")) {
+    chats = chats.filter((c) => c.id !== chatId);
+    saveChats();
+    renderChatsList();
+
+    if (currentChatId === chatId) {
+      if (chats.length > 0) {
+        switchToChat(chats[0].id);
+      } else {
+        createNewChat();
+      }
+    }
+  }
+}
+
+function renderChatsList() {
+  const chatsList = document.getElementById("chats-list");
+  chatsList.innerHTML = "";
+
+  chats.forEach((chat) => {
+    const chatElement = document.createElement("div");
+    chatElement.className = `chat-item ${
+      chat.id === currentChatId ? "active" : ""
+    }`;
+    chatElement.onclick = () => switchToChat(chat.id);
+
+    chatElement.innerHTML = `
+            <div class="chat-title">${chat.title}</div>
+            <button class="delete-chat" onclick="event.stopPropagation(); deleteChat('${chat.id}')">×</button>
+          `;
+
+    chatsList.appendChild(chatElement);
+  });
+}
+
+function updateChatListUI() {
+  document.querySelectorAll(".chat-item").forEach((item) => {
+    item.classList.remove("active");
+  });
+  const currentChatElement = document.querySelector(
+    `[onclick*="${currentChatId}"]`
+  );
+  if (currentChatElement) {
+    currentChatElement.classList.add("active");
+  }
+}
+
+function renderMessages(messages) {
+  const chatBox = document.getElementById("chat-box");
+  chatBox.innerHTML = "";
+
+  if (messages.length === 0) {
+    chatBox.innerHTML =
+      '<div class="say_hi">أهلاً! كيف يمكنني مساعدتك اليوم؟</div>';
+    return;
+  }
+
+  messages.forEach((msg) => {
+    addMessageToUI(msg.content, msg.role, false);
+  });
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function addMessageToUI(text, sender, save = true) {
+  const chatBox = document.getElementById("chat-box");
+  const msg = document.createElement("div");
+  msg.className = `message ${sender === "user" ? "user-msg" : "ai-msg"}`;
+  
+  // استخدام marked مع خيارات محسنة
+  msg.innerHTML = marked.parse(text, {
+    breaks: true,
+    gfm: true
+  });
+  
+  chatBox.appendChild(msg);
+
+  const welcomeMsg = chatBox.querySelector(".say_hi");
+  if (welcomeMsg) {
+    welcomeMsg.remove();
+  }
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  // تحسين عرض الأكواد بعد إضافة الرسالة
+  setTimeout(() => {
+    enhanceCodeBlocks();
+  }, 100);
+
+  if (save && currentChatId) {
+    const chat = chats.find((c) => c.id === currentChatId);
+    if (chat) {
+      chat.messages.push({ role: sender, content: text });
+      chat.updatedAt = new Date().toISOString();
+
+      if (
+        sender === "user" &&
+        chat.messages.filter((m) => m.role === "user").length === 1
+      ) {
+        chat.title = text.substring(0, 30) + (text.length > 30 ? "..." : "");
+      }
+
+      saveChats();
+      renderChatsList();
+    }
+  }
+}
+
+
+async function sendMessage() {
+  const userInput = document.getElementById("userInput");
+  const text = userInput.value.trim();
+  let mess_count = getUserMessageCount(currentChatId);
+  veiw_model_warn(mess_count);
+
+  if (!text || !currentChatId) return;
+
+  const sendBtn = document.getElementById("send-btn");
+  sendBtn.disabled = true;
+
+  addMessageToUI(text, "user");
+  userInput.value = "";
+
+  const chat = chats.find((c) => c.id === currentChatId);
+  if (!chat) return;
+
+  const prompt = `
+You are nanoAI, a highly capable AI assistant. You must generate responses based on the user's message and the stored memory below. Use memory only when relevant and avoid forcing personalization.
+
+========================
+🧠 USER MEMORY (for personalization)
+========================
+User Information:
+${userMemory.userInfo}
+
+Recent Activities:
+${userMemory.recentActivities}
+
+========================
+💬 USER MESSAGE
+========================
+${text}
+
+========================
+✅ RESPONSE GUIDELINES
+========================
+- Use the memory above to personalize ONLY when relevant
+- Maintain conversation continuity intelligently
+- Respond naturally and clearly without sounding like a robot
+- Do NOT repeat greetings (e.g., no "Hello again" in every message)
+- Avoid asking for info already stored in memory
+- Stay helpful, logical, and accurate
+- If the user asks for facts: be precise
+- If the user asks for opinions: be reasonable
+- If you don’t know something, clearly say so instead of guessing
+- Always respond in the SAME LANGUAGE as the user
+
+========================
+✍️ YOUR RESPONSE
+`;
+
+  const data = {
+    model: model_n,
+    messages: [
+      { role: "system", content: ai_self },
+      { role: "user", content: prompt },
+    ],
+    temperature: 0.7,
+    tools: [
+      {
+        type: "browser_search"
+      },
+      {
+        type: "code_interpreter"
+      }
+    ]
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (result.choices) {
+      const reply = result.choices[0].message.content;
+      addMessageToUI(reply, "assistant");
+      await updateUserMemory(text, reply);
+      updateMemoryDisplay();
+    } else {
+      addMessageToUI("⚠️ خطأ في الرد من API", "assistant");
+    }
+  } catch (error) {
+    addMessageToUI("❌ فشل الاتصال بالخادم", "assistant");
+  } finally {
+    sendBtn.disabled = false;
+    userInput.focus();
+  }
+}
+
+async function updateUserMemory(userMsg, botMsg) {
+  const memoryPrompt = `
+أنت نظام إدارة الذاكرة. مهمتك هي تحديث ذاكرة المستخدم بذكاء بناءً على المحادثة الجديدة.
+
+🧠 الذاكرة الحالية:
+معلومات المستخدم: ${userMemory.userInfo}
+النشاطات الحديثة: ${userMemory.recentActivities}
+
+💬 المحادثة الجديدة:
+المستخدم: ${userMsg}
+المساعد: ${botMsg}
+
+✅ المطلوب:
+قم بتحديث الذاكرة بناءً على المعلومات الجديدة المهمة فقط.
+احذف المعلومات المتكررة أو غير الضرورية.
+
+📝 مخرجات يجب أن تكون باللغة الإنجليزية وبالهيكل التالي:
+
+User Information:
+- [معلومات جديدة عن المستخدم]
+
+Recent Activities:
+- [نشاطات جديدة]
+
+إذا لم يكن هناك معلومات جديدة، اكتب "No updates".
+`;
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "qwen/qwen3-32b",
+        messages: [
+          {
+            role: "system",
+            content: `You are a memory manager. Update user memory with important, long-term information only. Respond in English with the exact format requested.`,
+          },
+          { role: "user", content: memoryPrompt },
+        ],
+        temperature: 0.3,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error("❌ لا يوجد رد من API للذاكرة");
+      return;
+    }
+
+    const newMemory = data.choices[0].message.content;
+
+    // إذا لم يكن هناك تحديثات
+    if (newMemory.includes("No updates")) {
+      console.log("✅ لا توجد تحديثات جديدة للذاكرة");
+      return;
+    }
+
+    // معالجة الذاكرة الجديدة
+    let updatedUserInfo = userMemory.userInfo;
+    let updatedRecentActivities = userMemory.recentActivities;
+
+    // فصل أقسام الذاكرة
+    const sections = newMemory.split(/\n\s*\n/);
+
+    sections.forEach((section) => {
+      if (section.includes("User Information:")) {
+        const lines = section
+          .split("\n")
+          .filter((line) => line.trim() && !line.includes("User Information:"));
+        if (lines.length > 0) {
+          updatedUserInfo = lines.join("\n").substring(0, 500);
+          console.log("📝 تم تحديث معلومات المستخدم");
+        }
+      }
+
+      if (section.includes("Recent Activities:")) {
+        const lines = section
+          .split("\n")
+          .filter(
+            (line) => line.trim() && !line.includes("Recent Activities:")
+          );
+        if (lines.length > 0) {
+          updatedRecentActivities = lines.join("\n").substring(0, 500);
+          console.log("📝 تم تحديث النشاطات الحديثة");
+        }
+      }
+    });
+
+    // حفظ الذاكرة المحدثة
+    userMemory = {
+      userInfo: updatedUserInfo,
+      recentActivities: updatedRecentActivities,
+    };
+
+    localStorage.setItem("mindoai_user_memory", JSON.stringify(userMemory));
+    console.log("💾 تم حفظ الذاكرة بنجاح:", userMemory);
+  } catch (err) {
+    console.error("❌ فشل تحديث الذاكرة:", err);
+  }
+}
+
+function updateMemoryDisplay() {
+  const memoryPreview = document.getElementById("memory-preview");
+  const memoryContent = document.getElementById("memory-content");
+
+  if (memoryPreview && memoryContent) {
+    // عرض معاينة أفضل
+    const preview =
+      userMemory.userInfo &&
+      userMemory.userInfo !== "لا توجد معلومات عن المستخدم بعد."
+        ? userMemory.userInfo.substring(0, 80) + "..."
+        : "لا توجد معلومات شخصية محفوظة";
+
+    memoryPreview.textContent = preview;
+
+    // عرض محتوى الذاكرة بشكل منظم
+    memoryContent.innerHTML = `
+      <div class="memory-section">
+        <strong>👤 المعلومات الشخصية:</strong>
+        <p>${userMemory.userInfo || "لا توجد معلومات عن المستخدم بعد."}</p>
+      </div>
+      <div class="memory-section">
+        <strong>📅 النشاطات الحديثة:</strong>
+        <p>${userMemory.recentActivities || "لا توجد نشاطات حديثة مسجلة."}</p>
+      </div>
+    `;
+
+    console.log("🔄 تم تحديث عرض الذاكرة");
+  }
+}
+
+function toggleMemoryContent() {
+  const memoryContent = document.getElementById("memory-content");
+  memoryContent.classList.toggle("show");
+}
+
+function clearMemory() {
+  if (
+    confirm(
+      "هل تريد مسح كل الذاكرة الشخصية؟ سيتم حذف جميع المعلومات المحفوظة عنك."
+    )
+  ) {
+    userMemory = {
+      userInfo: "لا توجد معلومات عن المستخدم بعد.",
+      recentActivities: "لا توجد نشاطات حديثة مسجلة.",
+    };
+    localStorage.setItem("mindoai_user_memory", JSON.stringify(userMemory));
+    updateMemoryDisplay();
+    addMessageToUI("🧹 تم مسح الذاكرة الشخصية بالكامل.", "assistant");
+  }
+}
+
+function handleKeyPress(event) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    sendMessage();
+  }
+
+  const textarea = event.target;
+  textarea.style.height = "auto";
+  textarea.style.height = Math.min(textarea.scrollHeight, 150) + "px";
+}
+
+function saveChats() {
+  localStorage.setItem("mindoai_chats", JSON.stringify(chats));
+}
+
+function loadChats() {
+  const savedChats = JSON.parse(localStorage.getItem("mindoai_chats"));
+  if (savedChats) {
+    chats = savedChats;
+    renderChatsList();
+  }
+}
+
+function setupResponsive() {
+  const menuToggle = document.querySelector(".menu-toggle");
+  const sidebar = document.getElementById("sidebar");
+
+  if (window.innerWidth <= 768) {
+    menuToggle.style.display = "block";
+    sidebar.classList.remove("open");
+  } else {
+    menuToggle.style.display = "none";
+    sidebar.classList.add("open");
+  }
+
+  window.addEventListener("resize", setupResponsive);
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.classList.toggle("open");
+}
+
+function close_model_warn() {
+  const Mwarn = document.querySelector(".model_warn");
+  if (Mwarn) {
+    Mwarn.classList.remove("show");
+    Mwarn.removeAttribute("open");
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// تهيئة Highlight.js عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+  // تهيئة أولية بعد تحميل DOM
+  setTimeout(() => {
+    enhanceCodeBlocks();
+  }, 100);
+  
+  // تهيئة إضافية بعد تحميل المحادثات
+  setTimeout(() => {
+    enhanceCodeBlocks();
+  }, 500);
+});
+
+// إعادة تهيئة الأكواد عند تبديل المحادثات
+function renderMessages(messages) {
+  const chatBox = document.getElementById("chat-box");
+  chatBox.innerHTML = "";
+
+  if (messages.length === 0) {
+    chatBox.innerHTML =
+      '<div class="say_hi">أهلاً! كيف يمكنني مساعدتك اليوم؟</div>';
+    return;
+  }
+
+  messages.forEach((msg) => {
+    addMessageToUI(msg.content, msg.role, false);
+  });
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+  
+  // إعادة تهيئة الأكواد بعد عرض الرسائل
+  setTimeout(() => {
+    enhanceCodeBlocks();
+  }, 100);
+}
+
+    </script>
+  </body>
+</html>
